@@ -28,7 +28,7 @@ tasks:
 
   test:watch:
     desc: "Run tests in watch mode"
-    deps: [test]
+    # deps: [test]
     cmds:
       - gotestsum --watch --format testdox -- -race ./...
     silent: true

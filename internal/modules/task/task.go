@@ -199,3 +199,96 @@ func NewTask(title string, options ...Option) (*Task, error) {
 
 	return task, nil
 }
+
+// SetStatus changes the status of the task after validating the new status.
+func (t *Task) SetStatus(s Status) error {
+	err := validateStatus(s)
+	if err != nil {
+		return err
+	}
+	now := time.Now().UTC()
+	switch s {
+	case StatusCompleted:
+		t.CompletedAt = &now
+		t.PostponedAt = nil
+	case StatusPostponed:
+		t.CompletedAt = nil
+		t.PostponedAt = &now
+	default:
+		t.CompletedAt = nil
+		t.PostponedAt = nil
+	}
+	t.Status = s
+	t.UpdatedAt = &now
+	return nil
+}
+
+// CycleStatus cycles the task status through Pending -> In Progress -> Completed -> Pending.
+func (t *Task) CycleStatus() error {
+	var newStatus Status
+
+	switch t.Status {
+	case StatusPending:
+		newStatus = StatusInProgress
+	case StatusInProgress:
+		newStatus = StatusCompleted
+	case StatusCompleted:
+		newStatus = StatusPending
+	case StatusPostponed:
+		newStatus = StatusPending
+	}
+
+	return t.SetStatus(newStatus)
+}
+
+// SetTitle changes the title of the task after validating the new title.
+func (t *Task) SetTitle(title string) error {
+	title = strings.TrimSpace(title)
+	err := validateTitle(title)
+	if err != nil {
+		return err
+	}
+	t.Title = title
+	now := time.Now().UTC()
+	t.UpdatedAt = &now
+	return nil
+}
+
+// SetDescription changes the description of the task after validating the new description.
+func (t *Task) SetDescription(description string) error {
+	description = strings.TrimSpace(description)
+	err := validateDescription(description)
+	if err != nil {
+		return err
+	}
+	t.Description = description
+	now := time.Now().UTC()
+	t.UpdatedAt = &now
+	return nil
+}
+
+// SetPriority changes the priority of the task after validating the new priority.
+func (t *Task) SetPriority(p Priority) error {
+	err := validatePriority(p)
+	if err != nil {
+		return err
+	}
+	t.Priority = p
+	now := time.Now().UTC()
+	t.UpdatedAt = &now
+	return nil
+}
+
+// SetDoDate changes the DoDate of the task.
+func (t *Task) SetDoDate(date *time.Time) {
+	t.DoDate = date
+	now := time.Now().UTC()
+	t.UpdatedAt = &now
+}
+
+// SetDueDate changes the DueDate of the task.
+func (t *Task) SetDueDate(date *time.Time) {
+	t.DueDate = date
+	now := time.Now().UTC()
+	t.UpdatedAt = &now
+}
