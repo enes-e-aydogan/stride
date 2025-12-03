@@ -21,6 +21,7 @@ var (
 	ErrTitleTooLong       = errors.New("title exceeds maximum length")
 	ErrDescriptionTooLong = errors.New("description exceeds maximum length")
 	ErrInvalidPriority    = errors.New("invalid priority value")
+	ErrInvalidStatus      = errors.New("invalid status value")
 	ErrCreatedAtNotSet    = errors.New("created at timestamp must be set")
 )
 
@@ -97,15 +98,46 @@ type Task struct {
 	UpdatedAt   *time.Time
 }
 
+func validateTitle(title string) error {
+	if len(title) == 0 {
+		return ErrTitleEmpty
+	}
+	if len(title) > MaxTitleLength {
+		return ErrTitleTooLong
+	}
+	return nil
+}
+
+func validateDescription(description string) error {
+	if len(description) > MaxDescriptionLength {
+		return ErrDescriptionTooLong
+	}
+	return nil
+}
+
+func validatePriority(p Priority) error {
+	if p < None || p > Blocker {
+		return ErrInvalidPriority
+	}
+	return nil
+}
+
+func validateStatus(s Status) error {
+	if s < StatusPending || s > StatusPostponed {
+		return ErrInvalidStatus
+	}
+	return nil
+}
+
 // Option defines a functional option for configuring a Task.
 type Option func(*Task) error
 
 // WithDescription sets the Description of the task.
-// Checks if the provided description exceeds the maximum length.
 func WithDescription(description string) Option {
 	return func(t *Task) error {
-		if len(description) > MaxDescriptionLength {
-			return ErrDescriptionTooLong
+		err := validateDescription(description)
+		if err != nil {
+			return err
 		}
 		t.Description = strings.TrimSpace(description)
 		return nil
@@ -113,11 +145,11 @@ func WithDescription(description string) Option {
 }
 
 // WithPriority sets the Priority of the task.
-// Checks if the provided priority is valid.
 func WithPriority(priority Priority) Option {
 	return func(t *Task) error {
-		if priority < None || priority > Blocker {
-			return ErrInvalidPriority
+		err := validatePriority(priority)
+		if err != nil {
+			return err
 		}
 		t.Priority = priority
 		return nil
@@ -138,16 +170,6 @@ func WithDoDate(doDate time.Time) Option {
 		t.DoDate = &doDate
 		return nil
 	}
-}
-
-func validateTitle(title string) error {
-	if len(title) == 0 {
-		return ErrTitleEmpty
-	}
-	if len(title) > MaxTitleLength {
-		return ErrTitleTooLong
-	}
-	return nil
 }
 
 // NewTask creates a new Task with the given title and options.
