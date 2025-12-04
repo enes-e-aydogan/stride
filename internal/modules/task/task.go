@@ -292,3 +292,42 @@ func (t *Task) SetDueDate(date *time.Time) {
 	now := time.Now().UTC()
 	t.UpdatedAt = &now
 }
+
+// Copy creates a deep copy of the Task and returns its pointer.
+func (t *Task) Copy() *Task {
+	c := &Task{
+		ID:          t.ID,
+		Title:       t.Title,
+		Description: t.Description,
+		Priority:    t.Priority,
+		Status:      t.Status,
+		CreatedAt:   t.CreatedAt,
+	}
+
+	if t.DueDate != nil {
+		dueDateCopy := *t.DueDate
+		c.DueDate = &dueDateCopy
+	}
+
+	if t.DoDate != nil {
+		doDateCopy := *t.DoDate
+		c.DoDate = &doDateCopy
+	}
+
+	if t.CompletedAt != nil {
+		completedAtCopy := *t.CompletedAt
+		c.CompletedAt = &completedAtCopy
+	}
+
+	if t.UpdatedAt != nil {
+		updatedAtCopy := *t.UpdatedAt
+		c.UpdatedAt = &updatedAtCopy
+	}
+
+	if t.PostponedAt != nil {
+		postponedAtCopy := *t.PostponedAt
+		c.PostponedAt = &postponedAtCopy
+	}
+
+	return c
+}
