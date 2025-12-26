@@ -1,0 +1,80 @@
+version: "3"
+
+tasks:
+  default:
+    desc: "Show available tasks"
+    cmds:
+      - go-task --list
+    silent: true
+
+  build:
+    desc: "Build the application"
+    cmds:
+      - go build -o bin/stride ./cmd/stride
+    silent: true
+
+  run:
+    desc: "Run the application"
+    deps: [build]
+    cmds:
+      - ./bin/stride
+    silent: true
+
+  test:
+    desc: "Run tests with coverage"
+    cmds:
+      - gotestsum --format testdox -- -race -coverprofile=coverage.out ./...
+    silent: true
+
+  test:watch:
+    desc: "Run tests in watch mode"
+    # deps: [test]
+    cmds:
+      - gotestsum --watch --format testdox -- -race ./...
+    silent: true
+
+  coverage:
+    desc: "Show test coverage report"
+    deps: [test]
+    cmds:
+      - go tool cover -func=coverage.out
+    silent: true
+
+  coverage:html:
+    desc: "Open coverage report in browser"
+    deps: [test]
+    cmds:
+      - go tool cover -html=coverage.out
+    silent: true
+
+  lint:
+    desc: "Run linter"
+    cmds:
+      - golangci-lint run
+    silent: true
+
+  lint:fix:
+    desc: "Run linter with auto-fix"
+    cmds:
+      - golangci-lint run --fix
+    silent: true
+
+  clean:
+    desc: "Clean build artifacts and cache"
+    cmds:
+      - rm -rf bin/ coverage.out
+      - go clean -cache -testcache
+    silent: true
+
+  check:
+    desc: "Run all checks (lint + test)"
+    cmds:
+      - task: lint
+      - task: test
+    silent: true
+
+  tidy:
+    desc: "Tidy dependencies"
+    cmds:
+      - go mod tidy
+    silent: true

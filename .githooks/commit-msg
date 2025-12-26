@@ -1,0 +1,26 @@
+#!/bin/sh
+
+MSG="$(head -n 1 "$1")"
+
+# allowed types
+TYPES="feat|fix|chore|docs|test|refactor|ci|build"
+
+echo "$MSG" | grep -Eq "^($TYPES)(\([a-z0-9-]+\))?: .+" || {
+  echo "Invalid commit message."
+  echo "Expected: type(scope): subject"
+  exit 1
+}
+
+SUBJECT="$(echo "$MSG" | sed 's/^[^:]*: //')"
+
+# must start lowercase
+echo "$SUBJECT" | grep -Eq '^[a-z]' || {
+  echo "Subject must start lowercase"
+  exit 1
+}
+
+# max 72 chars
+[ "${#SUBJECT}" -le 72 ] || {
+  echo "Subject too long (max 72 chars)"
+  exit 1
+}

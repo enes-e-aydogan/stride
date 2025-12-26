@@ -1,0 +1,15 @@
+#!/bin/sh
+
+echo "Running go fmt..."
+unformatted=$(gofmt -l .)
+
+[ -z "$unformatted" ] || {
+  echo "Unformatted files:"
+  echo "$unformatted"
+  exit 1
+}
+
+git diff --cached --check || {
+  echo "Whitespace errors detected"
+  exit 1
+}
